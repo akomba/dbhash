@@ -57,3 +57,9 @@ typings/
 # dotenv environment variables file
 .env
 
+# ignoring everything under build
+build/
+
+# ignoring swap files
+*.swp
+
