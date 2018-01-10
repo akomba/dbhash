@@ -19,7 +19,7 @@ contract('Dbhash', function (accounts) {
     await expectThrow(dbh.pushHash(2,{from:notOwner}));
   });
 
-  it('should throw if we want to store same value', async function() {
+  it('should throw if we want to store same value twice', async function() {
     let dbh  = await Dbhash.deployed();
     await expectThrow(dbh.pushHash(1));
   });
@@ -27,22 +27,17 @@ contract('Dbhash', function (accounts) {
   it('should read value of 1', async function() {
     let dbh  = await Dbhash.deployed();
     let res = await dbh.lookup(1);
-    assert.equal(res, true);
+    assert(res>0);
   });
 
   it('should read value of 2', async function() {
     let dbh  = await Dbhash.deployed();
-    let res = await dbh.lookup(2);
-    assert.equal(res, false);
+    await expectThrow( dbh.lookup(2))
   });
 
-/*   it('should fail if the input parameter is not a number (for store)', async function() {
+  it('should everybody can read values', async function() {
     let dbh  = await Dbhash.deployed();
-    await expectThrow(dbh.pushHash("sajt"));
+    let res = await dbh.lookup(1,{from:notOwner});
+    assert(res>0);
   });
-
-  it('should fail if the input parameter is not a number (for lookup)', async function() {
-    let dbh  = await Dbhash.deployed();
-    await expectThrow(dbh.lookup("sajt"));
-  }); */
 });
