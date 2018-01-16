@@ -1,4 +1,5 @@
 var Web3=require('web3');
+var Tx=require('ethereumjs-tx');
 var myAbi=[
     {
       "constant": true,
@@ -160,47 +161,57 @@ var myAbi=[
     }
   ];
 
-var web3=new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
-var owner=web3.eth.accounts[0];
+var web3=new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/nxUHdwQCRve60oHdiTge'));
+var owner='0x3C9e71a9b2A07009BD2400746dA9a1e1080Ba293';
 web3.eth.defaultAccount = owner;
+var pk=new Buffer('f01485c76fd0dff02453fce5d7a5700ced8a72685446f38316e262f086595d4f','hex');
+var contractAddress='0x6ff7761a12ad0c2967c34cf5306ad5b48166865d';
+var coder = require('web3/lib/solidity/coder');
 
-var contract= web3.eth.contract(myAbi).at("0x345ca3e014aaf5dca488057592ee47305d9b3e10");
 if(process.argv.length<3) return;
 
 var hash=process.argv[2];
-if(hash.indexOf("0x")!=0)hash="0x"+hash;
-var tx=contract.pushHash(hash,{from:owner});
+if(hash.indexOf('0x')!=0)hash='0x'+hash;
 
-var filter=web3.eth.filter('latest', function(error, result){
-  //console.log("f-err",error);
-  //console.log("f-res",result);
-  if(error || result){
-    if (!error) {
-      web3.eth.getTransactionReceipt(tx,function(e,r){
-        if(e || r){
-          if(!e){
-           // console.log("rec",r);
-            if(r.status){
-              //console.log("success!",r.logs[0].topics.length);
-              var evtSig=web3.sha3('HashStored(uint256,uint256)');
-              if(r.logs[0].topics.length==3 && evtSig==r.logs[0].topics[0]){
-                var timestamp=r.logs[0].topics[1];
-                var hash=r.logs[0].topics[2];
-                var d=new Date(Number(timestamp)*1000);
-                console.log(hash+'_'+d);
+var contract= web3.eth.contract(myAbi).at(contractAddress);
+var fnSignature=web3.sha3('pushHash(uint256)').slice(0, 10); //0x
+var nonce = web3.toHex(web3.eth.getTransactionCount(owner));
+var gasPrice = web3.toHex(web3.eth.gasPrice); 
+var gasLimitHex = web3.toHex(4600000);
+var dataHex = fnSignature + coder.encodeParams(['uint256'], [hash]);
+
+var rawTx={ 'nonce': nonce, 'gasPrice': gasPrice, 'gasLimit': gasLimitHex, 'from': owner, 'to': contractAddress, 'data': dataHex};
+var tx= new Tx(rawTx);
+tx.sign(pk);
+var serializedTx = '0x'+tx.serialize().toString('hex');
+
+web3.eth.sendRawTransaction(serializedTx, function(err, txHash){ 
+  if(!err){
+    var count=0;
+    const handle = setInterval(() => {
+      web3.eth.getTransactionReceipt(txHash,function(e, r){
+              if(e || r){
+                if(!e){
+                  if(r.status=='0x1'){
+                    var evtSig=web3.sha3('HashStored(uint256,uint256)');
+                    if(r.logs[0].topics.length==3 && evtSig==r.logs[0].topics[0]){
+                      var timestamp=r.logs[0].topics[1];
+                      var hash=r.logs[0].topics[2];
+                      var d=new Date(Number(timestamp)*1000);
+                      console.log(hash+'_'+d);
+                    }
+                  }else{
+                    console.log("error"); //status was 0x0
+                  }
+                }else{
+                  console.log("error"); //tx receipt error
+                }
+                clearInterval(handle);
               }
-            }else{
-              console.log("error");
-            }
-          }else{
-            console.log("error");
-          }
-          filter.stopWatching();
-        }
-      })
-    } else {
-      console.error("error");
-    }
-    
+            })
+            count++; // TODO: cancel polling after xxx usuccesful tries
+    },3000);
+  }else{
+    console.log("error"); //tx error
   }
 });
