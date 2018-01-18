@@ -162,11 +162,11 @@ var myAbi=[
     }
   ];
 
-var web3=new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/nxUHdwQCRve60oHdiTge'));
+var web3=new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/nxUHdwQCRve60oHdiTge'));
 var owner='0x3C9e71a9b2A07009BD2400746dA9a1e1080Ba293';
 var pk=new Buffer(priv.key,'hex');
 web3.eth.defaultAccount = owner;
-var contractAddress='0x6ff7761a12ad0c2967c34cf5306ad5b48166865d';
+var contractAddress='0x9590cfd2cf93c6299211edc60880fdc4bb3e8836';
 var coder = require('web3/lib/solidity/coder');
 
 if(process.argv.length<3) return;

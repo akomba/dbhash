@@ -58,7 +58,7 @@ typings/
 .env
 
 # ignoring everything under build
-build/
+# build/
 
 # ignoring swap files
 *.swp
