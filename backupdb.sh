@@ -15,8 +15,6 @@ curl $BACKUP_URL > rawdata
 
 fi
 
-exit 1
-
 echo 
 echo  CREATE DIGEST 
 echo 
