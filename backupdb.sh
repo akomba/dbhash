@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+if [ ! -f rawdata ]; then
+
 echo
 echo GET BACKUPS 
 echo
@@ -10,6 +12,10 @@ LATEST_BACKUP=$(echo $BACKUPS | awk '{print $1}')
 
 BACKUP_URL=$(heroku pg:backups:url $LATEST_BACKUP -a driver-admin-live)
 curl $BACKUP_URL > rawdata
+
+fi
+
+exit 1
 
 echo 
 echo  CREATE DIGEST 
