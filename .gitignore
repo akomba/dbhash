@@ -63,3 +63,5 @@ build/
 # ignoring swap files
 *.swp
 
+pkey.js
+rawdata

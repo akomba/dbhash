@@ -1,5 +1,6 @@
 var Web3=require('web3');
 var Tx=require('ethereumjs-tx');
+var priv=require('./pkey');
 var myAbi=[
     {
       "constant": true,
@@ -163,8 +164,8 @@ var myAbi=[
 
 var web3=new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/nxUHdwQCRve60oHdiTge'));
 var owner='0x3C9e71a9b2A07009BD2400746dA9a1e1080Ba293';
+var pk=new Buffer(priv.key,'hex');
 web3.eth.defaultAccount = owner;
-var pk=new Buffer('f01485c76fd0dff02453fce5d7a5700ced8a72685446f38316e262f086595d4f','hex');
 var contractAddress='0x6ff7761a12ad0c2967c34cf5306ad5b48166865d';
 var coder = require('web3/lib/solidity/coder');
 
